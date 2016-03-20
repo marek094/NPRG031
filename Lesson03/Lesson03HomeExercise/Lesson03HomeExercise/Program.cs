@@ -6,41 +6,39 @@ namespace Lesson03HomeExercise
     {
         static void Main(string[] args)
         {
-            TreeNode tree = CreateTree();
+            var tree = new TreeNode();
+            tree.TestInit();
 
-            bool contains = tree.Contains(10);
-            if (!contains)
-                throw new Exception("Contains is false.");
+            tree.Print();
+           
+            Console.WriteLine(tree.Contains(50));
+            Console.WriteLine(tree.Contains(10));
 
-            TreeNode find = tree.Find(10);
-            if (find == null)
-                throw new Exception("Contains is true.");
+            tree.Add(40);
+            tree.Add(30);
+            tree.Add(1);
+            //tree.Add(3);
+            //tree.Add(2);
 
-            bool remove = tree.Remove(10);
-            if (!remove)
-                throw new Exception("Remove is false.");
+            tree.Print();
 
+            Console.WriteLine(tree.Contains(70));  
+
+            Console.WriteLine(tree.Remove(10));
+            tree.Print();
+            Console.WriteLine(tree.Remove(50));
+            tree.Print();
+
+            /*
             contains = tree.Contains(10);
             if (contains)
-                throw new Exception("Contains is true, but item was removed.");
 
+                throw new Exception("Contains is true, but item was removed.");
             find = tree.Find(10);
             if (find != null)
                 throw new Exception("Item was removed.");
-        }
-
-
-        private static TreeNode CreateTree()
-        {
-            // Kořen stromu
-            TreeNode root = new TreeNode(-1);
-
-            for (int i = 0; i < 20; i++)
-            {
-                root.Add(i);
-            }
-
-            return root;
+            //*/
+            Console.ReadKey();
         }
     }
 }

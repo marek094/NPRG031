@@ -5,22 +5,28 @@ namespace Lesson03HomeExercise
 {
     public class TreeNode
     {
-        private readonly int _value;
+        private int value;
 
-        private TreeNode _parent;
-        private TreeNode _left;
-        private TreeNode _right;
+        /// <summary>
+        /// variable parent currently unused
+        /// </summary>
+        private TreeNode parent;
+        private TreeNode left;
+        private TreeNode right;
 
+        public TreeNode() {}
 
-        public TreeNode(int value)
-        {
-            _value = value;
+        private TreeNode(int _value) { value = _value; }
+
+        public int Value {
+            get { return value; }
         }
 
-
-        public int Value
+        public void TestInit()
         {
-            get { return _value; }
+            value = 50;
+            this.Left = new TreeNode(10);
+            this.Right = new TreeNode(100);
         }
 
         /// <summary>
@@ -38,32 +44,82 @@ namespace Lesson03HomeExercise
         /// </summary>
         public TreeNode Parent
         {
-            get { return _parent; }
-            private set { _parent = value; }
+            get { return parent; }
+            private set { parent = value; }
         }
 
         public TreeNode Left
         {
-            get { return _left; }
-            private set { _left = value; }
+            get { return left; }
+            private set
+            {
+                left = value;
+                if (value != null)
+                    value.Parent = this;
+            }
         }
 
         public TreeNode Right
         {
-            get { return _right; }
-            private set { _right = value; }
+            get { return right; }
+            private set
+            {
+                right = value;
+                if (value != null)
+                    value.Parent = this;
+            }
+        }
+
+        /// <summary>
+        /// Prints tree by levels
+        /// </summary>
+        public void Print()
+        {
+            var items = new Queue<TreeNode>();
+            items.Enqueue(this);
+            items.Enqueue(null);
+
+            while (items.Count > 1)
+            {
+                TreeNode act = items.Dequeue();
+                if (act == null)
+                {
+                    Console.WriteLine();
+                    items.Enqueue(null);
+                }
+                else
+                {
+                    Console.Write(act.Value + " ");
+                    if (act.Left != null) items.Enqueue(act.Left);
+                    if (act.Right != null) items.Enqueue(act.Right);
+                }
+            }
+
+            Console.WriteLine();
+            Console.WriteLine();
         }
 
 
         public void Add(int item)
         {
-            TreeNode node = GetItemWithMaxOneChild(this);
-            TreeNode child = new TreeNode(item);
-            if (node.Left == null)
-                node.Left = child;
-            else if (node.Right == null)
-                node.Right = child;
-            child.Parent = node;
+            var act = FindBefore(item);
+            var child = new TreeNode(item);
+            if (item < act.Value)
+            {
+                if (act.Left != null) throw new Exception("Error in left-side insert.");
+                act.Left = child;
+            }
+            else if (act.Value < item)
+            {
+                if (act.Left != null) throw new Exception("Error in right-side insert.");
+                act.Right = child;
+            }
+            else
+            {
+                // Is already in set
+            }
+
+            return;
         }
 
         /// <summary>
@@ -73,7 +129,8 @@ namespace Lesson03HomeExercise
         /// <returns>Vrátí TreeNode, který jako Value má zadanou hodnotu. Pokud takový TreeNode neexistuje, vrátí null.</returns>
         public TreeNode Find(int value)
         {
-            throw new NotImplementedException();
+            var ptr = FindBefore(value);
+            return (ptr.Value == value ? ptr : null);
         }
 
         /// <summary>
@@ -83,7 +140,8 @@ namespace Lesson03HomeExercise
         /// <returns></returns>
         public bool Contains(int value)
         {
-            throw new NotImplementedException();
+            var ptr = FindBefore(value);
+            return ptr.Value == value;
         }
 
         /// <summary>
@@ -101,33 +159,43 @@ namespace Lesson03HomeExercise
         /// <returns>True => odstraněno, False => nic neodstraněno (není ve stromu).</returns>
         public bool Remove(int value)
         {
-            throw new NotImplementedException();
+            var act = Find(value);
+            if (act == null) return false;
+
+            if (act.Left == null)
+            {
+                if (act.Parent.Left == act) act.Parent.Left = act.Right;
+                else act.Parent.Right = act.Left;
+            }
+            else
+            {
+                // find lower bound
+                var del = act.Left.FindBefore(value);
+                act.value = del.Value;
+                if (del == act.Left)
+                {
+                    act.Left = act.Left.Right;
+                }
+                else
+                {
+                    del.Parent.Right = del.Left;
+                }
+            }
+
+            return true;
         }
 
-
-        /// <summary>
-        /// Nalezení prvku s maximálně jedním potomkem.
-        /// Používá BFS.
-        /// </summary>
-        /// <param name="root"></param>
-        /// <returns></returns>
-        private TreeNode GetItemWithMaxOneChild(TreeNode root)
+        private TreeNode FindBefore(int value)
         {
-            var items = new List<TreeNode>();
-            items.Add(root);
-
-            while (items.Count > 0)
+            TreeNode prev = null, act = this;
+            while (act != null)
             {
-                TreeNode first = items[0];
-                items.RemoveAt(0);
-
-                if (first.Left == null || first.Right == null)
-                    return first;
-
-                items.Add(first.Left);
-                items.Add(first.Right);
+                prev = act;
+                if (act.Value < value) act = act.Right;
+                else if (value < act.Value) act = act.Left;
+                else return act;
             }
-            return null;
+            return prev;
         }
     }
 }
